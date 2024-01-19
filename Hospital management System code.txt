@@ -1,0 +1,398 @@
+package medicalrecord;
+import java.util.*;
+import java.io.*;
+import java.util.*;
+
+/**
+ *
+ * @author User
+ */
+
+
+class CSVReader {
+    public static List<String[]> readCSV(String filePath) {
+        List<String[]> data = new ArrayList<>();
+        String fullPath = "C:\\Users\\User\\Desktop\\12 semester\\" + filePath;
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                data.add(fields);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+}
+
+class CSVWriter {
+    public static void writeCSV(String filePath, List<String[]> data) {
+        String fullPath = "C:\\Users\\User\\Desktop\\12 semester\\" + filePath;
+        try (FileWriter writer = new FileWriter(filePath)) {
+            for (String[] fields : data) {
+                StringBuilder line = new StringBuilder();
+                for (String field : fields) {
+                    line.append(field).append(",");
+                }
+                line.deleteCharAt(line.length() - 1); // Remove last comma
+                writer.write(line.toString() + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+abstract class MedicalRecord {
+    private String name;
+
+    public MedicalRecord(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public abstract void displayDetails();
+
+    public abstract void run();
+
+    public static void main(String[] args) {
+        MedicalRecord app = new HospitalManagementSystem("Hospital Management System");
+        app.run();
+    }
+}
+
+class Patient extends MedicalRecord {
+    private int patientId;
+    private int age;
+
+    public Patient(String name, int age, int patientId) {
+        super(name);
+        this.age = age;
+        this.patientId = patientId;
+    }
+
+    @Override
+    public void displayDetails() {
+        System.out.println("Patient ID: " + patientId);
+        System.out.println("Name: " + getName());
+        System.out.println("Age: " + age);
+    }
+
+    @Override
+    public void run() {
+        
+    }
+}
+
+class Doctor extends MedicalRecord {
+    private String specialization;
+    private int age;
+
+    public Doctor(String name, int age, String specialization) {
+        super(name);
+        this.age = age;
+        this.specialization = specialization;
+    }
+
+    @Override
+    public void displayDetails() {
+        System.out.println("Doctor Name: " + getName());
+        System.out.println("Age: " + age);
+        System.out.println("Specialization: " + specialization);
+    }
+
+    @Override
+    public void run() {
+        
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public String getSpecialization() {
+        return specialization;
+    }
+}
+
+class Hospital {
+    private List<Patient> patients = new ArrayList<>();
+    private List<Doctor> doctors = new ArrayList<>();
+    private Map<String, Patient> patientMap = new HashMap<>();
+  
+    public void addPatient(Patient patient) {
+        patients.add(patient);
+        patientMap.put(patient.getName(), patient);
+    }
+
+    public void removePatient(String name) {
+        Patient patient = patientMap.get(name);
+        if (patient != null) {
+            patients.remove(patient);
+            patientMap.remove(name);
+        }
+    }
+
+    public void addDoctor(Doctor doctor) {
+        doctors.add(doctor);
+    }
+
+    public void listPatients() {
+        for (Patient patient : patients) {
+            patient.displayDetails();
+            System.out.println();
+        }
+    }
+
+    public void listDoctors() {
+        for (Doctor doctor : doctors) {
+            doctor.displayDetails();
+            System.out.println();
+        }
+    }
+
+     public List<Doctor> getDoctors() {
+        return doctors;
+    }
+    
+    
+    
+    
+    public Patient searchPatientByName(String name) {
+        return patientMap.get(name);
+    }
+}
+
+
+
+class HospitalManagementSystem extends MedicalRecord {
+    private Hospital hospital;
+    private Scanner scanner;
+
+    public HospitalManagementSystem(String name) {
+        super(name);
+        hospital = new Hospital();
+        scanner = new Scanner(System.in);
+    }
+
+    @Override
+    public void displayDetails() {
+        System.out.println("Welcome to " + getName());
+    }
+
+    @Override
+    public void run() {
+        displayDetails();
+
+        while (true) {
+            System.out.println("Select mode:");
+            System.out.println("1. Admin Mode");
+            System.out.println("2. User Mode");
+            System.out.println("3. Exit");
+            int modeChoice = scanner.nextInt();
+
+            if (modeChoice == 1) {
+                adminMode();
+            } else if (modeChoice == 2) {
+                userMode();
+            } else if (modeChoice == 3) {
+                System.out.println("Exiting the system...");
+                break;
+            } else {
+                System.out.println("Invalid choice. Please select again.");
+            }
+        }
+    }
+
+
+
+
+
+   
+    public void adminMode() {
+        while (true) {
+            System.out.println("Admin Mode:");
+            System.out.println("1. Add Patient");
+            System.out.println("2. Remove Patient");
+            System.out.println("3. Add Doctor");
+            System.out.println("4. List Patients");
+            System.out.println("5. List Doctors");
+            System.out.println("6. Switch to User Mode");
+            System.out.println("7. Back to Main Menu");
+            int adminChoice = scanner.nextInt();
+
+            switch (adminChoice) {
+                case 1:
+                    System.out.print("Enter patient name: ");
+                    String patientName = scanner.next();
+                    System.out.print("Enter patient age: ");
+                    int patientAge = scanner.nextInt();
+                    System.out.print("Enter patient ID: ");
+                    int patientId = scanner.nextInt();
+                    Patient newPatient = new Patient(patientName, patientAge, patientId);
+                    hospital.addPatient(newPatient);
+                    System.out.println("Patient added successfully!");
+                    break;
+                case 2:
+                    System.out.print("Enter patient name to remove: ");
+                    String patientToRemove = scanner.next();
+                    hospital.removePatient(patientToRemove);
+                    System.out.println("Patient removed successfully!");
+                    break;
+                case 3:
+                    System.out.print("Enter doctor name: ");
+                    String doctorName = scanner.next();
+                    System.out.print("Enter doctor age: ");
+                    int doctorAge = scanner.nextInt();
+                    System.out.print("Enter doctor specialization: ");
+                    String doctorSpecialization = scanner.next();
+                    Doctor newDoctor = new Doctor(doctorName, doctorAge, doctorSpecialization);
+                    hospital.addDoctor(newDoctor);
+                    System.out.println("Doctor added successfully!");
+                    break;
+                case 4:
+                    System.out.println("Patients:");
+                    hospital.listPatients();
+                    break;
+                case 5:
+                    System.out.println("Doctors:");
+                    hospital.listDoctors();
+                    break;
+                case 6:
+                    return; // Switch to user mode
+                case 7:
+                    return; // Return to main menu
+                default:
+                    System.out.println("Invalid choice. Please select again.");
+            }
+        }
+    }
+
+    public void userMode() {
+        while (true) {
+            System.out.println("User Mode:");
+            System.out.println("1. Book Appointment");
+            System.out.println("2. View Doctor Details");
+            System.out.println("3. Search Patient by Name");
+            System.out.println("4. Switch to Admin Mode");
+            System.out.println("5. Back to Main Menu");
+            int userChoice = scanner.nextInt();
+
+            switch (userChoice) {
+                case 1:
+                    System.out.println("Doctors available for appointment:");
+                     List<Doctor> availableDoctors = hospital.getDoctors();
+                    for (int i = 0; i < availableDoctors.size(); i++) {
+                        System.out.println((i + 1) + ". " + availableDoctors.get(i).getName());
+                    }
+                    System.out.print("Select a doctor by number: ");
+                    int doctorChoice = scanner.nextInt();
+                    if (doctorChoice >= 1 && doctorChoice <= availableDoctors.size()) {
+                        Doctor selectedDoctor = availableDoctors.get(doctorChoice - 1);
+                        System.out.print("Enter patient name for appointment: ");
+                        String patientName = scanner.next();
+                        Patient patient = hospital.searchPatientByName(patientName);
+                        if (patient != null) {
+                            System.out.println("Appointment booked!");
+                            System.out.println("Patient: " + patient.getName());
+                            System.out.println("Doctor: " + selectedDoctor.getName());
+                        } else {
+                            System.out.println("Patient not found.");
+                        }
+                    } else {
+                        System.out.println("Invalid choice.");
+                    }
+                    break;
+                case 2:
+                    System.out.println("Doctors:");
+                    hospital.listDoctors();
+                    System.out.print("Enter doctor name to view details: ");
+                    String doctorName = scanner.next();
+                    Doctor doctor = null;
+                    for (Doctor d : hospital.getDoctors()) {
+                        if (d.getName().equalsIgnoreCase(doctorName)) {
+                            doctor = d;
+                            break;
+                        }
+                    }
+                    if (doctor != null) {
+                        doctor.displayDetails();
+                    } else {
+                        System.out.println("Doctor not found.");
+                    }
+                    break;
+                case 3:
+                    System.out.print("Enter patient name to search: ");
+                    String patientName = scanner.next();
+                    Patient foundPatient = hospital.searchPatientByName(patientName);
+                    if (foundPatient != null) {
+                        foundPatient.displayDetails();
+                    } else {
+                        System.out.println("Patient not found.");
+                    }
+                    break;
+                case 4:
+                    return; // Switch to admin mode
+                case 5:
+                    return; // Return to main menu
+                default:
+                    System.out.println("Invalid choice. Please select again.");
+            }
+        }
+    }
+
+    
+    
+     private String getDesktopFolderPath() {
+        String desktopPath = System.getProperty("user.home") + File.separator + "Desktop";
+        return desktopPath + File.separator + "12 semester";
+    }
+
+    private void saveDoctorsToCSV() {
+    List<Doctor> doctorList = hospital.getDoctors();
+
+    String folderPath = getDesktopFolderPath();
+    String fullPath = folderPath + File.separator + "doctors.csv";
+
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullPath))) {
+        for (Doctor doctor : doctorList) {
+            String doctorLine = String.format("%s,%d,%s", doctor.getName(), doctor.getAge(), doctor.getSpecialization());
+            writer.write(doctorLine);
+            writer.newLine();
+        }
+        System.out.println("Doctor data saved to CSV.");
+    } catch (IOException e) {
+        e.printStackTrace();
+        System.out.println("Error saving doctor data to CSV.");
+    }
+}
+
+    private void loadDoctorsFromCSV() {
+        String folderPath = getDesktopFolderPath();
+        String fullPath = folderPath + File.separator + "doctors.csv";
+
+        List<String[]> doctorData = CSVReader.readCSV(fullPath);
+        hospital.getDoctors().clear(); // Clear existing doctors
+        for (String[] fields : doctorData) {
+            String name = fields[0];
+            int age = Integer.parseInt(fields[1]);
+            String specialization = fields[2];
+            Doctor doctor = new Doctor(name, age, specialization);
+            hospital.addDoctor(doctor);
+        }
+        System.out.println("Doctor data loaded from CSV.");
+    }
+
+    
+    
+    public static void main(String[] args) {
+        MedicalRecord app = new HospitalManagementSystem("Hospital Management System");
+        app.run();
+    }
+}
